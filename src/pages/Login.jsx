@@ -2,43 +2,59 @@ import { useState } from 'react';
 import './Login.css';
 
 function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [isLogin, setIsLogin] = useState(true); // Switch entre Login et Register
+  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
 
-  const validateEmail = (email) => {
-    return String(email).toLowerCase().match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-  };
-
-  // Regex pour : 1 Maj, 1 Min, 1 Chiffre, 1 Caractère spécial, min 8 caractères
-  const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return passwordRegex.test(password);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePassword = (pass) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pass);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation Email
     if (!validateEmail(formData.email)) {
       setError('Format d\'email invalide.');
       return;
     }
 
-    // Validation Mot de passe
     if (!validatePassword(formData.password)) {
-      setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial (@$!%*?&).');
+      setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.');
       return;
     }
 
-    alert("Validation réussie ! Connexion en cours...");
+    // Logique spécifique à l'inscription (Register)
+    if (!isLogin && formData.password !== formData.confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    const mode = isLogin ? "Connexion" : "Inscription";
+    alert(`${mode} réussie ! (Simulation)`);
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>Connexion</h2>
-        <p className="login-subtitle">Sécurité renforcée</p>
+        
+        {/* Les deux rectangles (onglets) au dessus */}
+        <div className="auth-tabs">
+          <button 
+            className={`auth-tab ${isLogin ? 'active' : ''}`} 
+            onClick={() => { setIsLogin(true); setError(''); }}
+          >
+            Se connecter
+          </button>
+          <button 
+            className={`auth-tab ${!isLogin ? 'active' : ''}`} 
+            onClick={() => { setIsLogin(false); setError(''); }}
+          >
+            S'inscrire
+          </button>
+        </div>
+
+        <h2>{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
+
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
@@ -63,10 +79,24 @@ function Login() {
             />
           </div>
 
-          {error && <div className="error-message" style={{ lineHeight: '1.4' }}>{error}</div>}
+          {/* Champ supplémentaire si on est en mode Inscription */}
+          {!isLogin && (
+            <div className="form-group">
+              <label>Confirmer le mot de passe</label>
+              <input 
+                type="password" 
+                className="input-field" 
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                placeholder="••••••••"
+              />
+            </div>
+          )}
+
+          {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="btn-login">
-            Se connecter
+            {isLogin ? 'Se connecter' : 'Créer mon compte'}
           </button>
         </form>
       </div>
