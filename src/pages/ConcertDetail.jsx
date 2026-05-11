@@ -1,9 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
 import { CONCERTS } from '../data/concerts';
+import { useCart } from '../context/CartContext';
 import './ConcertDetail.css';
 
 function ConcertDetail() {
   const { id } = useParams();
+  const { addToCart } = useCart(); 
   const concert = CONCERTS.find(c => c.id === parseInt(id));
 
   if (!concert) {
@@ -38,8 +40,8 @@ function ConcertDetail() {
           </div>
           
           {concert.stock > 0 ? (
-            <button className="btn-buy">
-              Réserver maintenant
+            <button className="btn-buy" onClick={() => { addToCart(concert); alert("Ajouté au panier !"); }}>
+                Ajouter au panier
             </button>
           ) : (
             <button className="btn-buy btn-disabled" disabled>
