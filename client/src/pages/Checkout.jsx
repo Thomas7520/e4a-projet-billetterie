@@ -27,10 +27,17 @@ function Checkout() {
   }, [user, navigate]);
 
   const handleReturn = async () => {
-    await finalizeOrder(user.id); 
-    navigate('/');
-  };
-
+  try {
+    const result = await finalizeOrder(user.id);
+    if (result && result.error) {
+      alert("Erreur lors de la validation : " + result.error);
+    } else {
+      navigate('/');
+    }
+  } catch (err) {
+    alert("Une erreur technique est survenue.");
+  }
+};
   if (!user) return null;
 
   return (

@@ -13,8 +13,33 @@ export function CartProvider({ children }) {
   }, []);
 
   const addToCart = (concert, quantity) => {
+  // Chercher si l'article est déjà dans le panier
+  const existingItemIndex = cart.findIndex(item => item.id === concert.id);
+  
+  let currentQtyInCart = 0;
+  if (existingItemIndex !== -1) {
+    currentQtyInCart = cart[existingItemIndex].selectedQuantity;
+  }
+
+  const totalRequested = currentQtyInCart + quantity;
+
+  // Vérification stricte du stock 
+  if (totalRequested > concert.stock) {
+    alert(`Action impossible : Il ne reste que ${concert.stock} places au total et vous en avez déjà ${currentQtyInCart} dans votre panier.`);
+    return false;
+  }
+
+  // Mise à jour ou Ajout
+  if (existingItemIndex !== -1) {
+    const newCart = [...cart];
+    newCart[existingItemIndex].selectedQuantity = totalRequested;
+    setCart(newCart);
+  } else {
     setCart(prev => [...prev, { ...concert, selectedQuantity: quantity }]);
-  };
+  }
+
+  return true;
+};
 
   const removeFromCart = (index) => {
     setCart(prev => prev.filter((_, i) => i !== index));

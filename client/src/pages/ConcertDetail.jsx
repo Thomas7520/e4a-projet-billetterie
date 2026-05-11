@@ -41,8 +41,8 @@ function ConcertDetail() {
                 className="input-field"
               />
               <button className="btn-buy" onClick={() => { 
-                addToCart(concert, quantity); 
-                alert(`${quantity} billet(s) ajouté(s) au panier !`); 
+                if(addToCart(concert, quantity)) 
+                  alert(`${quantity} billet(s) ajouté(s) au panier !`); 
               }}>
                 Ajouter au panier
               </button>

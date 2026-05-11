@@ -81,17 +81,32 @@ app.post('/api/orders', (req, res) => {
   const itemsSummary = cart.map(i => `${i.selectedQuantity}x ${i.artiste}`).join(', ');
 
   const transaction = db.transaction(() => {
+    // Pour chaque article, on vérifie si le stock est suffisant AVANT de décrémenter
+    for (const item of cart) {
+      const concert = db.prepare('SELECT stock FROM concerts WHERE id = ?').get(item.id);
+      
+      if (!concert || concert.stock < item.selectedQuantity) {
+        // On déclanche une erreur pour annuler toute la transaction (Rollback)
+        throw new Error(`Stock insuffisant pour ${item.artiste}`);
+      }
+
+      // Mise à jour du stock
+      db.prepare('UPDATE concerts SET stock = stock - ? WHERE id = ?')
+        .run(item.selectedQuantity, item.id);
+    }
+
+    // Si on arrive ici, tout est bon, on enregistre la commande
     db.prepare('INSERT INTO commandes (user_id, items, total, date_commande) VALUES (?, ?, ?, ?)')
       .run(userId, itemsSummary, total, new Date().toLocaleString());
-
-    const stmtUpdate = db.prepare('UPDATE concerts SET stock = stock - ? WHERE id = ?');
-    for (const item of cart) {
-      stmtUpdate.run(item.selectedQuantity, item.id);
-    }
   });
 
-  transaction();
-  res.json({ success: true });
+  try {
+    transaction();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Erreur commande :", error.message);
+    res.status(400).json({ success: false, error: error.message });
+  }
 });
 
 // Récupérer l'historique d'un utilisateur 
