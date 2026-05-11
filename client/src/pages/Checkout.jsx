@@ -5,16 +5,16 @@ import './Checkout.css';
 
 function Checkout() {
   const [isProcessing, setIsProcessing] = useState(true);
-  const { cart, calculateTotal, clearCart } = useCart();
+  const { cart, calculateTotal, finalizeOrder } = useCart(); 
   const navigate = useNavigate();
   
-  // On stocke le total avant de vider le panier
   const [finalTotal] = useState(calculateTotal());
-  const [ticketCount] = useState(cart.length);
-
+  const [ticketCount] = useState(
+    cart.reduce((sum, item) => sum + item.selectedQuantity, 0)
+  );
   useEffect(() => {
-    // Simulation du délai bancaire
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      await finalizeOrder(); // succès paiement
       setIsProcessing(false);
     }, 2000);
 
@@ -22,8 +22,7 @@ function Checkout() {
   }, []);
 
   const handleReturn = () => {
-    clearCart();
-    navigate('/');
+    navigate('/');     
   };
 
   return (
@@ -36,7 +35,7 @@ function Checkout() {
         </div>
       ) : (
         <div className="success-card">
-          <div className="success-icon"></div> {/* L'icône SVG vient du CSS */}
+          <div className="success-icon"></div>
           <h1>Paiement Accepté</h1>
           <p>Votre commande a été validée avec succès.</p>
           
