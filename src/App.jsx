@@ -1,9 +1,11 @@
+import Home from './pages/Home';
+
 function App() {
   return (
-    <div>
-      <h1>Projet Billetterie</h1>
+    <div className="App">
+      <Home />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
