@@ -24,22 +24,28 @@ export function CartProvider({ children }) {
     return cart.reduce((sum, item) => sum + (item.prixBase * item.selectedQuantity), 0);
   };
 
-  const finalizeOrder = async () => {
-    const total = calculateTotal();
-    
-    const response = await fetch('http://localhost:5000/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cart, total })
-    });
+  const finalizeOrder = async (userId) => {
+  if (!userId) return; 
 
-    if (response.ok) {
-      const updatedRes = await fetch('http://localhost:5000/api/concerts');
-      const updatedData = await updatedRes.json();
-      setConcerts(updatedData);
-      setCart([]);
-    }
-  };
+  const total = calculateTotal();
+  
+  const response = await fetch('http://localhost:5000/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      cart, 
+      total, 
+      userId: userId 
+    })
+  });
+
+  if (response.ok) {
+    const updatedRes = await fetch('http://localhost:5000/api/concerts');
+    const updatedData = await updatedRes.json();
+    setConcerts(updatedData);
+    setCart([]);
+  }
+};
 
   return (
     <CartContext.Provider value={{ concerts, cart, addToCart, removeFromCart, finalizeOrder, calculateTotal }}>

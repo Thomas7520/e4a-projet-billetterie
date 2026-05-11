@@ -1,29 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useUser } from '../context/UserContext'; 
 import './Checkout.css';
 
 function Checkout() {
   const [isProcessing, setIsProcessing] = useState(true);
-  const { cart, calculateTotal, finalizeOrder } = useCart(); 
+  const { cart, calculateTotal, finalizeOrder } = useCart();
+  const { user } = useUser(); 
   const navigate = useNavigate();
   
   const [finalTotal] = useState(calculateTotal());
-  const [ticketCount] = useState(
-    cart.reduce((sum, item) => sum + item.selectedQuantity, 0)
-  );
+  const [ticketCount] = useState(cart.reduce((sum, item) => sum + item.selectedQuantity, 0));
+
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      await finalizeOrder(); // succès paiement
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const timer = setTimeout(() => {
       setIsProcessing(false);
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [user, navigate]);
 
-  const handleReturn = () => {
-    navigate('/');     
+  const handleReturn = async () => {
+    await finalizeOrder(user.id); 
+    navigate('/');
   };
+
+  if (!user) return null;
 
   return (
     <div className="checkout-container">
@@ -31,13 +39,13 @@ function Checkout() {
         <div className="loader-wrapper">
           <h2>Vérification de la transaction...</h2>
           <div className="loader"></div>
-          <p>Communication sécurisée avec votre banque</p>
+          <p>Utilisateur : {user.email}</p>
         </div>
       ) : (
         <div className="success-card">
           <div className="success-icon"></div>
           <h1>Paiement Accepté</h1>
-          <p>Votre commande a été validée avec succès.</p>
+          <p>Merci {user.prenom}, votre commande est validée.</p>
           
           <div className="order-info">
             <p><strong>Total payé :</strong> {finalTotal} €</p>

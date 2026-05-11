@@ -1,15 +1,27 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 import './Login.css';
 
 function Login() {
-  const [isLogin, setIsLogin] = useState(true); // Switch entre Login et Register
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ 
+    email: '', 
+    password: '', 
+    confirmPassword: '',
+    nom: '',
+    prenom: ''
+  });
   const [error, setError] = useState('');
 
+  const navigate = useNavigate();
+  const { login } = useUser();
+
+  // Regex de validation
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (pass) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(pass);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -19,25 +31,51 @@ function Login() {
     }
 
     if (!validatePassword(formData.password)) {
-      setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.');
+      setError('Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial (@$!%*?&).');
       return;
     }
 
-    // Logique spécifique à l'inscription (Register)
     if (!isLogin && formData.password !== formData.confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
       return;
     }
 
-    const mode = isLogin ? "Connexion" : "Inscription";
-    alert(`${mode} réussie ! (Simulation)`);
+    if (!isLogin && (!formData.nom || !formData.prenom)) {
+      setError('Veuillez renseigner votre nom et prénom.');
+      return;
+    }
+
+    const endpoint = isLogin ? '/api/login' : '/api/register';
+    
+    try {
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          nom: formData.nom,
+          prenom: formData.prenom
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        login(isLogin ? data.user : { id: data.userId, ...formData });
+        navigate('/'); 
+      } else {
+        setError(data.error || "Une erreur est survenue.");
+      }
+    } catch (err) {
+      setError("Impossible de contacter le serveur. Vérifiez qu'il est lancé.");
+    }
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
         
-        {/* Les deux rectangles (onglets) au dessus */}
         <div className="auth-tabs">
           <button 
             className={`auth-tab ${isLogin ? 'active' : ''}`} 
@@ -55,8 +93,32 @@ function Login() {
 
         <h2>{isLogin ? 'Connexion' : 'Créer un compte'}</h2>
 
-
         <form onSubmit={handleSubmit} noValidate>
+          {!isLogin && (
+            <div className="row">
+              <div className="form-group">
+                <label>Prénom</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={formData.prenom}
+                  onChange={(e) => setFormData({...formData, prenom: e.target.value})}
+                  placeholder="Jean"
+                />
+              </div>
+              <div className="form-group">
+                <label>Nom</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={formData.nom}
+                  onChange={(e) => setFormData({...formData, nom: e.target.value})}
+                  placeholder="Dupont"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="form-group">
             <label>Adresse Email</label>
             <input 
@@ -79,7 +141,6 @@ function Login() {
             />
           </div>
 
-          {/* Champ supplémentaire si on est en mode Inscription */}
           {!isLogin && (
             <div className="form-group">
               <label>Confirmer le mot de passe</label>
@@ -93,7 +154,7 @@ function Login() {
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" style={{ marginBottom: '15px' }}>{error}</div>}
 
           <button type="submit" className="btn-login">
             {isLogin ? 'Se connecter' : 'Créer mon compte'}
