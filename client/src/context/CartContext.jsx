@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const CartContext = createContext();
 
@@ -25,7 +26,7 @@ export function CartProvider({ children }) {
 
   // Vérification stricte du stock 
   if (totalRequested > concert.stock) {
-    alert(`Action impossible : Il ne reste que ${concert.stock} places au total et vous en avez déjà ${currentQtyInCart} dans votre panier.`);
+    toast.error(`Stock insuffisant ! Il ne reste que ${concert.stock} places.`);
     return false;
   }
 

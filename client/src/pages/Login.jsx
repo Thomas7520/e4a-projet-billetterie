@@ -1,7 +1,10 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import './Login.css';
+
+import toast from 'react-hot-toast';
 
 function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -64,6 +67,8 @@ function Login() {
       if (data.success) {
         login(isLogin ? data.user : { id: data.userId, ...formData });
         navigate('/'); 
+
+        toast.success(isLogin ? `Ravi de vous revoir, ${data.user.prenom} !` : "Compte créé avec succès !");
       } else {
         setError(data.error || "Une erreur est survenue.");
       }

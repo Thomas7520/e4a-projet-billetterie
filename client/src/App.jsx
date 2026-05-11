@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast'; 
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
@@ -11,11 +13,15 @@ import Orders from './pages/Orders';
 import { CartProvider } from './context/CartContext'; 
 import { UserProvider } from './context/UserContext'; 
 
+
+
+
 function App() {
   return (
     <UserProvider>
       <CartProvider>
         <Router>
+          <Toaster position="bottom-right" reverseOrder={false} />
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />

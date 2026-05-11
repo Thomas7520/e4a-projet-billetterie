@@ -1,5 +1,7 @@
+
 import { useParams, Link } from 'react-router-dom';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
 import './ConcertDetail.css';
 
@@ -42,8 +44,8 @@ function ConcertDetail() {
               />
               <button className="btn-buy" onClick={() => { 
                 if(addToCart(concert, quantity)) 
-                  alert(`${quantity} billet(s) ajouté(s) au panier !`); 
-              }}>
+                  toast.success(`${quantity} place(s) ajoutée(s) au panier !`);
+                }}>
                 Ajouter au panier
               </button>
             </div>
