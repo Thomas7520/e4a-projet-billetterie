@@ -1,0 +1,88 @@
+.detail-container {
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.back-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.concert-sheet {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 15px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.concert-sheet h1 {
+  font-size: 2.8rem;
+  margin: 0 0 10px 0;
+  color: #1a1a1a;
+}
+
+.concert-meta {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.description-section {
+  line-height: 1.8;
+  color: #444;
+  margin-bottom: 40px;
+}
+
+.booking-card {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 25px;
+  border: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-info h4 {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.price-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.btn-buy {
+  padding: 15px 30px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-buy:hover {
+  background-color: #218838;
+}
+
+.btn-disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.stock-info {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+}

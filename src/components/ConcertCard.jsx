@@ -1,19 +1,28 @@
+import { Link } from 'react-router-dom';
+import './ConcertCard.css';
+
 function ConcertCard({ concert }) {
+  const isAvailable = concert.stock > 0;
+
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', marginBottom: '10px', backgroundColor: '#f9f9f9' }}>
-      <h2>{concert.artiste}</h2>
-      <p><strong>Lieu :</strong> {concert.lieu}</p>
-      <p><strong>Date :</strong> {new Date(concert.date).toLocaleDateString()}</p>
-      <p>{concert.description}</p>
-      <p><strong>Prix :</strong> {concert.prixBase} €</p>
-      
-      {concert.stock > 0 ? (
-        <button style={{ backgroundColor: '#007bff', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}>
-          Réserver ({concert.stock} places restantes)
-        </button>
-      ) : (
-        <p style={{ color: 'red', fontWeight: 'bold' }}>COMPLET</p>
-      )}
+    <div className="concert-card">
+      <div className="concert-info">
+        <h3>{concert.artiste}</h3>
+        <p>{concert.lieu}</p>
+        <p>{new Date(concert.date).toLocaleDateString()}</p>
+      </div>
+
+      <div className="concert-status">
+        <span className="price-tag">{concert.prixBase} €</span>
+        
+        {isAvailable ? (
+          <Link to={`/concert/${concert.id}`} className="btn-detail">
+            Réserver
+          </Link>
+        ) : (
+          <span className="sold-out">Complet</span>
+        )}
+      </div>
     </div>
   );
 }

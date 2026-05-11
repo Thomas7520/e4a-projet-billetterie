@@ -1,0 +1,65 @@
+.concert-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.concert-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.concert-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+  color: #1a1a1a;
+}
+
+.concert-info p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.concert-status {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-tag {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.btn-detail {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-detail:hover {
+  background-color: #0056b3;
+}
+
+.sold-out {
+  color: #e74c3c;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 1px solid #e74c3c;
+  padding: 8px;
+  border-radius: 4px;
+}
