@@ -1,0 +1,11 @@
+.payment-form-container { padding: 40px 20px; display: flex; justify-content: center; }
+.payment-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+.form-section { margin-top: 25px; }
+.form-section h3 { font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
+.row { display: flex; gap: 10px; margin-bottom: 10px; }
+.payment-card input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; }
+.card-input-wrapper { position: relative; }
+.card-logos { position: absolute; right: 10px; top: 12px; font-size: 0.7rem; display: flex; gap: 5px; color: #ccc; }
+.card-logos span.active { color: #007bff; font-weight: bold; }
+.btn-pay-final { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+.total-to-pay { background: #e7f3ff; padding: 10px; border-radius: 6px; text-align: center; }
