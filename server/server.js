@@ -24,6 +24,7 @@ db.exec(`
     titre       TEXT NOT NULL DEFAULT '',
     artiste     TEXT NOT NULL,
     date        TEXT NOT NULL,
+    heure       TEXT NOT NULL DEFAULT '',
     lieu        TEXT NOT NULL,
     description TEXT,
     statut      TEXT NOT NULL DEFAULT 'ouvert',
@@ -63,6 +64,8 @@ db.exec(`
 
 
 
+try { db.exec("ALTER TABLE concerts ADD COLUMN heure TEXT NOT NULL DEFAULT ''"); } catch {}
+
 // test cartes
 const insertCard = db.prepare(
   'INSERT OR REPLACE INTO cartes_paiement (card_number, titulaire, solde, cvv, expiration) VALUES (?, ?, ?, ?, ?)'
@@ -80,17 +83,17 @@ if (count === 0) {
     .run('admin@billetterie.fr', hashedPwd, 'Admin', 'Billetterie', 'admin');
 
   const insertConcert = db.prepare(
-    'INSERT INTO concerts (titre, artiste, date, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO concerts (titre, artiste, date, heure, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
   );
   const dp = insertConcert.run(
     'Retour à la Pyramide', 'Daft Punk',
-    '2026-12-15', 'Accor Arena, Paris',
+    '2026-12-15', '20:00', 'Accor Arena, Paris',
     'Le retour des légendes. Une nuit électro inoubliable.',
     'ouvert', 85, 330
   );
   const jt = insertConcert.run(
     'Hyperdrama Tour', 'Justice',
-    '2026-09-20', 'Zénith de Lille',
+    '2026-09-20', '21:00', 'Zénith de Lille',
     'Justice de retour en France pour le Hyperdrama Tour.',
     'ouvert', 65, 230
   );
@@ -162,13 +165,13 @@ const recomputeConcertSummary = (concertId) => {
 };
 
 app.post('/api/admin/concerts', (req, res) => {
-  const { userId, titre, artiste, date, lieu, description, statut, categories } = req.body;
+  const { userId, titre, artiste, date, heure, lieu, description, statut, categories } = req.body;
   if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
 
   const create = db.transaction(() => {
     const info = db.prepare(
-      'INSERT INTO concerts (titre, artiste, date, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, 0, 0)'
-    ).run(titre, artiste, date, lieu, description || '', statut || 'ouvert');
+      'INSERT INTO concerts (titre, artiste, date, heure, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)'
+    ).run(titre, artiste, date, heure || '', lieu, description || '', statut || 'ouvert');
 
     const concertId = info.lastInsertRowid;
 
@@ -188,12 +191,12 @@ app.post('/api/admin/concerts', (req, res) => {
 });
 
 app.put('/api/admin/concerts/:id', (req, res) => {
-  const { userId, titre, artiste, date, lieu, description, statut } = req.body;
+  const { userId, titre, artiste, date, heure, lieu, description, statut } = req.body;
   if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
 
   db.prepare(
-    'UPDATE concerts SET titre=?, artiste=?, date=?, lieu=?, description=?, statut=? WHERE id=?'
-  ).run(titre, artiste, date, lieu, description || '', statut, req.params.id);
+    'UPDATE concerts SET titre=?, artiste=?, date=?, heure=?, lieu=?, description=?, statut=? WHERE id=?'
+  ).run(titre, artiste, date, heure || '', lieu, description || '', statut, req.params.id);
 
   res.json({ success: true });
 });

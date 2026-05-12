@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
 import './PaymentForm.css';
 import toast from 'react-hot-toast';
+import { validatePostalCode, validateCardExpiry, validateCVV, validateCardNumber } from '../utils/helpers';
 
 function PaymentForm() {
   const navigate = useNavigate();
@@ -34,29 +35,22 @@ function PaymentForm() {
 
     if (!user) { navigate('/login'); return; }
 
-    if (!/^\d{5}$/.test(form.cp)) {
+    if (!validatePostalCode(form.cp)) {
       toast.error('Le code postal doit contenir exactement 5 chiffres.');
       return;
     }
 
-    const [month, year] = form.exp.split('/');
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = parseInt(now.getFullYear().toString().slice(-2));
-    if (!month || !year || parseInt(month) < 1 || parseInt(month) > 12) {
-      toast.error("Mois d'expiration invalide (01-12).");
-      return;
-    }
-    if (parseInt(year) < currentYear || (parseInt(year) === currentYear && parseInt(month) < currentMonth)) {
-      toast.error('La carte est expirée.');
+    if (!validateCardExpiry(form.exp)) {
+      toast.error("Date d'expiration invalide ou carte expirée.");
       return;
     }
 
-    if (form.cvv.length < 3 || form.cvv.length > 4) {
+    if (!validateCVV(form.cvv)) {
       toast.error('Le CVV doit contenir 3 ou 4 chiffres.');
       return;
     }
-    if (form.cardNum.length < 16) {
+
+    if (!validateCardNumber(form.cardNum)) {
       toast.error('Numéro de carte incomplet.');
       return;
     }

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import './Admin.css';
 
 const EMPTY_FORM = {
-  titre: '', artiste: '', date: '', lieu: '', description: '', statut: 'ouvert',
+  titre: '', artiste: '', date: '', heure: '', lieu: '', description: '', statut: 'ouvert',
 };
 const EMPTY_CATEGORY = { nom: '', prix: '', stock_initial: '' };
 
@@ -83,7 +83,8 @@ function Admin() {
     setEditId(concert.id);
     setForm({
       titre: concert.titre, artiste: concert.artiste, date: concert.date,
-      lieu: concert.lieu, description: concert.description || '', statut: concert.statut,
+      heure: concert.heure || '', lieu: concert.lieu,
+      description: concert.description || '', statut: concert.statut,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -194,6 +195,8 @@ function Admin() {
           </div>
           <div className="form-row">
             <input type="date" name="date" value={form.date} onChange={handleChange}
+              required className="input-field" />
+            <input type="time" name="heure" value={form.heure} onChange={handleChange}
               required className="input-field" />
             <input name="lieu" value={form.lieu} onChange={handleChange}
               placeholder="Lieu *" required className="input-field" />

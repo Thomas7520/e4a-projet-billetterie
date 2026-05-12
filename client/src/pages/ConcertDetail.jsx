@@ -48,6 +48,7 @@ function ConcertDetail() {
         <h1>{concert.titre || concert.artiste}</h1>
         <p className="concert-meta">
           {concert.artiste} · {concert.lieu} · {new Date(concert.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          {concert.heure ? ` à ${concert.heure.replace(':', 'h')}` : ''}
         </p>
 
         <div className="description-section">

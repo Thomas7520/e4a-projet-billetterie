@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { calculateTotal as calcTotal, isStockSufficient, isQuantityValid } from '../utils/helpers';
 
 const CartContext = createContext();
 
@@ -32,13 +33,13 @@ export function CartProvider({ children }) {
     const totalRequested = currentQtyInCart + quantity;
     const stockLimit = category ? category.stock_restant : concert.stock;
 
-    if (totalRequested > stockLimit) {
+    if (!isStockSufficient(stockLimit, totalRequested)) {
       const label = category ? ` en ${category.nom}` : '';
       toast.error(`Stock insuffisant ! Il ne reste que ${stockLimit} place(s)${label}.`);
       return false;
     }
 
-    if (totalRequested > 6) {
+    if (!isQuantityValid(totalRequested)) {
       toast.error('Maximum 6 billets par commande pour cette catégorie.');
       return false;
     }
@@ -64,9 +65,7 @@ export function CartProvider({ children }) {
     setCart(prev => prev.filter((_, i) => i !== index));
   };
 
-  const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.prixUnitaire * item.selectedQuantity), 0);
-  };
+  const calculateTotal = () => calcTotal(cart);
 
   const finalizeOrder = async (userId) => {
     if (!userId) return { error: 'Utilisateur non connecté' };
