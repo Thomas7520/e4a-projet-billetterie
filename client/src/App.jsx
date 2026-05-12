@@ -8,7 +8,8 @@ import ConcertDetail from './pages/ConcertDetail';
 import Checkout from './pages/Checkout';
 import PaymentForm from './pages/PaymentForm';
 import Cart from './pages/Cart'; 
-import Orders from './pages/Orders'; 
+import Orders from './pages/Orders';
+import Admin from './pages/Admin';
 
 import { CartProvider } from './context/CartContext'; 
 import { UserProvider } from './context/UserContext'; 
@@ -30,7 +31,8 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/payment" element={<PaymentForm />} />
-            <Route path="/orders" element={<Orders />} /> 
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </Router>
       </CartProvider>

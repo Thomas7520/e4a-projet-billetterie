@@ -98,10 +98,17 @@
 
 .dropdown-logout {
   color: #d9534f !important; 
+    font-weight: 600;
 }
 
 .dropdown-orders {
-  color: #007bff !important; 
+  color: #007bff !important;
+  font-weight: 600;
+}
+
+.dropdown-admin {
+  color: #f97316 !important;
+  font-weight: 600;
 }
 
 .cart-badge {

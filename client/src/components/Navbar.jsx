@@ -36,10 +36,20 @@ function Navbar() {
             {isMenuOpen && (
               <ul className="dropdown-menu">
                 <li>
-                  <Link to="/orders" onClick={() => setIsMenuOpen(false)}  className="dropdown-orders">
+                  <Link to="/orders" onClick={() => setIsMenuOpen(false)} className="dropdown-orders">
                     Mes Commandes
                   </Link>
                 </li>
+                {user.role === 'admin' && (
+                  <>
+                    <li className="dropdown-divider"></li>
+                    <li>
+                      <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="dropdown-admin">
+                        Administration
+                      </Link>
+                    </li>
+                  </>
+                )}
                 <li className="dropdown-divider"></li>
                 <li>
                   <button onClick={handleLogout} className="dropdown-logout">

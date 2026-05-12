@@ -118,6 +118,57 @@ app.get('/api/concerts', (req, res) => {
   res.json(concerts);
 });
 
+app.get('/api/concerts/:id', (req, res) => {
+  const concert = db.prepare('SELECT * FROM concerts WHERE id = ?').get(req.params.id);
+  if (!concert) return res.status(404).json({ error: 'Concert introuvable' });
+  res.json(concert);
+});
+
+app.get('/api/concerts/:id/categories', (req, res) => {
+  const cats = db.prepare('SELECT * FROM categories_places WHERE concert_id = ?').all(req.params.id);
+  res.json(cats);
+});
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+
+const checkAdmin = (userId) => {
+  const user = db.prepare('SELECT role FROM users WHERE id = ?').get(userId);
+  return user && user.role === 'admin';
+};
+
+app.post('/api/admin/concerts', (req, res) => {
+  const { userId, titre, artiste, date, lieu, description, statut, prixBase, stock } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  const info = db.prepare(
+    'INSERT INTO concerts (titre, artiste, date, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(titre, artiste, date, lieu, description || '', statut || 'ouvert', prixBase, stock);
+
+  res.json({ success: true, id: info.lastInsertRowid });
+});
+
+app.put('/api/admin/concerts/:id', (req, res) => {
+  const { userId, titre, artiste, date, lieu, description, statut, prixBase, stock } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  db.prepare(
+    'UPDATE concerts SET titre=?, artiste=?, date=?, lieu=?, description=?, statut=?, prixBase=?, stock=? WHERE id=?'
+  ).run(titre, artiste, date, lieu, description || '', statut, prixBase, stock, req.params.id);
+
+  res.json({ success: true });
+});
+
+app.patch('/api/admin/concerts/:id/statut', (req, res) => {
+  const { userId, statut } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  const validStatuts = ['ouvert', 'complet', 'annulé', 'terminé', 'brouillon'];
+  if (!validStatuts.includes(statut)) return res.status(400).json({ error: 'Statut invalide' });
+
+  db.prepare('UPDATE concerts SET statut=? WHERE id=?').run(statut, req.params.id);
+  res.json({ success: true });
+});
+
 app.post('/api/orders', (req, res) => {
   const { cart, total, userId } = req.body;
   const itemsSummary = cart.map(i => `${i.selectedQuantity}x ${i.artiste}`).join(', ');

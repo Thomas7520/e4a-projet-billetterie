@@ -7,10 +7,14 @@ export function CartProvider({ children }) {
   const [concerts, setConcerts] = useState([]);
   const [cart, setCart] = useState([]);
 
-  useEffect(() => {
+  const refreshConcerts = () => {
     fetch('http://localhost:5000/api/concerts')
       .then(res => res.json())
       .then(data => setConcerts(data));
+  };
+
+  useEffect(() => {
+    refreshConcerts();
   }, []);
 
   const addToCart = (concert, quantity) => {
@@ -74,7 +78,7 @@ export function CartProvider({ children }) {
 };
 
   return (
-    <CartContext.Provider value={{ concerts, cart, addToCart, removeFromCart, finalizeOrder, calculateTotal }}>
+    <CartContext.Provider value={{ concerts, cart, addToCart, removeFromCart, finalizeOrder, calculateTotal, refreshConcerts }}>
       {children}
     </CartContext.Provider>
   );
