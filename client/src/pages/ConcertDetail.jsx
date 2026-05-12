@@ -26,6 +26,17 @@ function ConcertDetail() {
 
   if (!concert) return <div className="detail-container"><p>Chargement...</p></div>;
 
+  if (concert.statut === 'annulé') return (
+    <div className="detail-container">
+      <Link to="/" className="back-link">← Retour à la liste</Link>
+      <article className="concert-sheet">
+        <h1>{concert.titre || concert.artiste}</h1>
+        <p className="concert-meta">{concert.artiste} · {concert.lieu}</p>
+        <p style={{ color: '#e74c3c', fontWeight: 'bold', marginTop: '20px' }}>Ce concert a été annulé.</p>
+      </article>
+    </div>
+  );
+
   const maxQty = selectedCat ? Math.min(6, selectedCat.stock_restant) : 0;
 
   const handleSelectCat = (cat) => {

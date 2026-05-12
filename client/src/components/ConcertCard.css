@@ -63,4 +63,26 @@
   border: 1px solid #e74c3c;
   padding: 8px;
   border-radius: 4px;
+  text-align: center;
+}
+
+.badge-annule {
+ color: #e74c3c;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: 1px solid #e74c3c;
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.concert-card--annule {
+  
+  opacity: 0.6;
+  background-color: #f8f8f8;
+}
+
+.concert-card--annule:hover {
+  transform: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }

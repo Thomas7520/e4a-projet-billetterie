@@ -5,7 +5,7 @@ import { useUser } from '../context/UserContext';
 import './Navbar.css';
 
 function Navbar() {
-  const { cart } = useCart();
+  useCart();
   const { user, logout } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false); 
   const navigate = useNavigate();

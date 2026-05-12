@@ -4,7 +4,7 @@ import ConcertCard from '../components/ConcertCard';
 import './Home.css';
 
 function Home() {
-  const { concerts } = useCart(); 
+  const { concerts } = useCart();
   const [filters, setFilters] = useState({ artiste: "", lieu: "", date: "", prixMax: "" });
   const [showSuggestions, setShowSuggestions] = useState({ artiste: false, lieu: false });
 
@@ -19,7 +19,13 @@ function Home() {
     setShowSuggestions(prev => ({ ...prev, [name]: false }));
   };
 
-  // On filtre sur 'concerts'
+  const getSuggestions = (name) => {
+    const saisie = filters[name].toLowerCase();
+    if (!saisie) return [];
+    const valeurs = [...new Set(concerts.map(c => c[name]).filter(Boolean))];
+    return valeurs.filter(v => v.toLowerCase().includes(saisie) && v.toLowerCase() !== saisie).slice(0, 5);
+  };
+
   const filteredConcerts = concerts.filter(concert => {
     const search = filters.artiste.toLowerCase();
     const matchArtiste = concert.artiste.toLowerCase().includes(search) ||
@@ -33,15 +39,37 @@ function Home() {
   return (
     <div className="home-container">
       <h1>Billetterie</h1>
-      
+
       <div className="filter-panel">
         <div className="filter-group">
           <label>Artiste / Titre :</label>
-          <input type="text" name="artiste" value={filters.artiste} onChange={handleChange} className="input-field" placeholder="Ex: Daft Punk" />
+          <input
+            type="text" name="artiste" value={filters.artiste}
+            onChange={handleChange} className="input-field" placeholder="Ex: Daft Punk"
+            onBlur={() => setTimeout(() => setShowSuggestions(p => ({ ...p, artiste: false })), 150)}
+          />
+          {showSuggestions.artiste && getSuggestions('artiste').length > 0 && (
+            <ul className="suggestion-list">
+              {getSuggestions('artiste').map(v => (
+                <li key={v} className="suggestion-item" onMouseDown={() => selectSuggestion('artiste', v)}>{v}</li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="filter-group">
           <label>Lieu :</label>
-          <input type="text" name="lieu" value={filters.lieu} onChange={handleChange} className="input-field" placeholder="Ex: Paris" />
+          <input
+            type="text" name="lieu" value={filters.lieu}
+            onChange={handleChange} className="input-field" placeholder="Ex: Paris"
+            onBlur={() => setTimeout(() => setShowSuggestions(p => ({ ...p, lieu: false })), 150)}
+          />
+          {showSuggestions.lieu && getSuggestions('lieu').length > 0 && (
+            <ul className="suggestion-list">
+              {getSuggestions('lieu').map(v => (
+                <li key={v} className="suggestion-item" onMouseDown={() => selectSuggestion('lieu', v)}>{v}</li>
+              ))}
+            </ul>
+          )}
         </div>
         <div className="filter-group">
           <label>Date :</label>

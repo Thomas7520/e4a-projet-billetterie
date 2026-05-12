@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useUser } from '../context/UserContext';
@@ -12,14 +12,10 @@ function PaymentForm() {
   const { user } = useUser();
 
   const [form, setForm] = useState({
-    nom: '', prenom: '', adresse: '', ville: '', cp: '',
+    nom: user?.nom || '', prenom: user?.prenom || '', adresse: '', ville: '', cp: '',
     cardNum: '', exp: '', cvv: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (user) setForm(prev => ({ ...prev, nom: user.nom || '', prenom: user.prenom || '' }));
-  }, [user]);
 
   const handleExpiryChange = (e) => {
     const value = e.target.value;
@@ -78,7 +74,8 @@ function PaymentForm() {
         return;
       }
 
-      navigate('/checkout', { state: { total, ticketCount } });
+      const transactionId = 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      navigate('/checkout', { state: { total, ticketCount, transactionId } });
     } finally {
       setIsLoading(false);
     }

@@ -44,7 +44,7 @@ function Checkout() {
           <div className="order-info">
             <p><strong>Total payé :</strong> {state.total} €</p>
             <p><strong>Billets réservés :</strong> {state.ticketCount}</p>
-            <p><strong>N° de transaction :</strong> TXN-{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
+            <p><strong>N° de transaction :</strong> {state.transactionId}</p>
           </div>
 
           <button className="btn-buy" onClick={() => navigate('/')}>

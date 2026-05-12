@@ -72,7 +72,7 @@ function Login() {
       } else {
         setError(data.error || "Une erreur est survenue.");
       }
-    } catch (err) {
+    } catch {
       setError("Impossible de contacter le serveur. Vérifiez qu'il est lancé.");
     }
   };
