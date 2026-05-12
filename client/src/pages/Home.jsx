@@ -21,7 +21,10 @@ function Home() {
 
   // On filtre sur 'concerts'
   const filteredConcerts = concerts.filter(concert => {
-    return concert.artiste.toLowerCase().includes(filters.artiste.toLowerCase()) &&
+    const search = filters.artiste.toLowerCase();
+    const matchArtiste = concert.artiste.toLowerCase().includes(search) ||
+                         (concert.titre || '').toLowerCase().includes(search);
+    return matchArtiste &&
            concert.lieu.toLowerCase().includes(filters.lieu.toLowerCase()) &&
            (filters.date === "" || concert.date === filters.date) &&
            (filters.prixMax === "" || concert.prixBase <= parseFloat(filters.prixMax));
@@ -33,7 +36,7 @@ function Home() {
       
       <div className="filter-panel">
         <div className="filter-group">
-          <label>Artiste :</label>
+          <label>Artiste / Titre :</label>
           <input type="text" name="artiste" value={filters.artiste} onChange={handleChange} className="input-field" placeholder="Ex: Daft Punk" />
         </div>
         <div className="filter-group">

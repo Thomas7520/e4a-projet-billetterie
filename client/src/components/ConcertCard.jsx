@@ -7,13 +7,14 @@ function ConcertCard({ concert }) {
   return (
     <div className="concert-card">
       <div className="concert-info">
-        <h3>{concert.artiste}</h3>
+        <h3>{concert.titre || concert.artiste}</h3>
+        <p className="concert-artist">{concert.artiste}</p>
         <p>{concert.lieu}</p>
         <p>{new Date(concert.date).toLocaleDateString()}</p>
       </div>
 
       <div className="concert-status">
-        <span className="price-tag">{concert.prixBase} €</span>
+        <span className="price-tag">À partir de {concert.prixBase} €</span>
         
         {isAvailable ? (
           <Link to={`/concert/${concert.id}`} className="btn-detail">

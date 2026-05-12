@@ -19,8 +19,8 @@ function ConcertDetail() {
       <Link to="/" className="back-link">← Retour à la liste</Link>
       
       <article className="concert-sheet">
-        <h1>{concert.artiste}</h1>
-        <p className="concert-meta">{concert.lieu} | {concert.date}</p>
+        <h1>{concert.titre || concert.artiste}</h1>
+        <p className="concert-meta">{concert.artiste} · {concert.lieu} · {new Date(concert.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         
         <div className="description-section">
           <h3>Description</h3>
