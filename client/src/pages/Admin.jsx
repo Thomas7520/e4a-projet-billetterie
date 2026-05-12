@@ -34,7 +34,6 @@ function Admin() {
     if (!user || user.role !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // ── Formulaire concert ───────────────────────────────────────────────────────
 
   const handleChange = (e) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
