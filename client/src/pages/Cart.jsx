@@ -1,10 +1,22 @@
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+import toast from 'react-hot-toast';
 import './Cart.css';
 
 function Cart() {
   const { cart, removeFromCart, calculateTotal } = useCart();
+  const { user } = useUser();
   const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error('Connectez-vous pour finaliser votre commande.');
+      navigate('/login');
+      return;
+    }
+    navigate('/payment');
+  };
 
   return (
     
@@ -31,7 +43,7 @@ function Cart() {
           <div className="cart-summary">
             <h3>Total à régler</h3>
             <div className="total-price">{calculateTotal()} €</div>
-              <button className="btn-checkout" onClick={() => navigate('/payment')}>
+              <button className="btn-checkout" onClick={handleCheckout}>
                 Procéder au paiement
               </button>
           </div>

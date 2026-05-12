@@ -9,3 +9,4 @@
 .card-logos span.active { color: #007bff; font-weight: bold; }
 .btn-pay-final { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
 .total-to-pay { background: #e7f3ff; padding: 10px; border-radius: 6px; text-align: center; }
+.btn-pay-final:disabled { background: #86efac; cursor: not-allowed; }

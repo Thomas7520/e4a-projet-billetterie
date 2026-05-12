@@ -50,9 +50,27 @@ db.exec(`
     statut        TEXT NOT NULL DEFAULT 'payée',
     FOREIGN KEY(user_id) REFERENCES users(id)
   );
+
+  CREATE TABLE IF NOT EXISTS cartes_paiement (
+    card_number TEXT PRIMARY KEY,
+    titulaire   TEXT NOT NULL,
+    solde       REAL NOT NULL,
+    cvv         TEXT NOT NULL DEFAULT '',
+    expiration  TEXT NOT NULL DEFAULT ''
+  );
 `);
 
 
+
+
+// test cartes
+const insertCard = db.prepare(
+  'INSERT OR REPLACE INTO cartes_paiement (card_number, titulaire, solde, cvv, expiration) VALUES (?, ?, ?, ?, ?)'
+);
+insertCard.run('4111111111111111', 'Alice Dupont',  500.00, '123', '12/26');
+insertCard.run('4222222222222222', 'Bob Martin',    150.00, '456', '08/27');
+insertCard.run('5100000000000099', 'Claire Leroy',   50.00, '789', '03/26');
+insertCard.run('5500000000000004', 'David Bernard',   0.00, '321', '06/28');
 
 // Test
 const { count } = db.prepare('SELECT count(*) as count FROM concerts').get();
@@ -237,6 +255,19 @@ app.post('/api/orders', (req, res) => {
   ).join(', ');
 
   const transaction = db.transaction(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkedConcerts = new Set();
+    for (const item of cart) {
+      if (checkedConcerts.has(item.id)) continue;
+      checkedConcerts.add(item.id);
+      const concert = db.prepare('SELECT titre, statut, date FROM concerts WHERE id = ?').get(item.id);
+      if (!concert) throw new Error('Concert introuvable');
+      if (concert.statut === 'annulé') throw new Error(`Le concert "${concert.titre}" est annulé`);
+      if (new Date(concert.date) < today) throw new Error(`Le concert "${concert.titre}" est déjà passé`);
+    }
+
     for (const item of cart) {
       if (item.categoryId) {
         const cat = db.prepare('SELECT * FROM categories_places WHERE id = ?').get(item.categoryId);
@@ -272,6 +303,24 @@ app.post('/api/orders', (req, res) => {
 app.get('/api/orders/:userId', (req, res) => {
   const orders = db.prepare('SELECT * FROM commandes WHERE user_id = ? ORDER BY id DESC').all(req.params.userId);
   res.json(orders);
+});
+
+app.post('/api/payment', (req, res) => {
+  const { cardNumber, cvv, expiration, total } = req.body;
+  if (!cardNumber || !cvv || !expiration || total == null)
+    return res.status(400).json({ error: 'Données manquantes' });
+
+  const card = db.prepare('SELECT * FROM cartes_paiement WHERE card_number = ?').get(cardNumber);
+  if (!card) return res.status(404).json({ error: 'Carte bancaire introuvable' });
+  if (card.expiration !== expiration || card.cvv !== cvv) return res.status(402).json({ error: 'Carte invalide' });
+  if (card.solde < total) {
+    return res.status(402).json({
+      error: `Solde insuffisant — solde disponible : ${card.solde.toFixed(2)} €`,
+    });
+  }
+
+  db.prepare('UPDATE cartes_paiement SET solde = solde - ? WHERE card_number = ?').run(total, cardNumber);
+  res.json({ success: true });
 });
 
 app.listen(5000, () => console.log('Serveur lancé sur http://localhost:5000'));

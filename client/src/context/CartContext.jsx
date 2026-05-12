@@ -69,27 +69,25 @@ export function CartProvider({ children }) {
   };
 
   const finalizeOrder = async (userId) => {
-  if (!userId) return; 
+    if (!userId) return { error: 'Utilisateur non connecté' };
 
-  const total = calculateTotal();
-  
-  const response = await fetch('http://localhost:5000/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      cart, 
-      total, 
-      userId: userId 
-    })
-  });
+    const total = calculateTotal();
+    const response = await fetch('http://localhost:5000/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cart, total, userId }),
+    });
 
-  if (response.ok) {
-    const updatedRes = await fetch('http://localhost:5000/api/concerts');
-    const updatedData = await updatedRes.json();
-    setConcerts(updatedData);
-    setCart([]);
-  }
-};
+    const data = await response.json();
+    if (response.ok) {
+      const updatedRes = await fetch('http://localhost:5000/api/concerts');
+      const updatedData = await updatedRes.json();
+      setConcerts(updatedData);
+      setCart([]);
+      return { success: true };
+    }
+    return { error: data.error || 'Erreur lors de la commande' };
+  };
 
   return (
     <CartContext.Provider value={{ concerts, cart, addToCart, removeFromCart, finalizeOrder, calculateTotal, refreshConcerts }}>
