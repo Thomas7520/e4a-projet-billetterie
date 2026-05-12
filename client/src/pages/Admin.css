@@ -125,7 +125,98 @@
 
 .btn-admin-danger:hover { background: #fecaca; }
 
+.admin-concert-block {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.admin-concert-block .admin-concert-row {
+  border: none;
+  border-radius: 0;
+}
+
+.btn-admin-categories {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btn-admin-categories:hover { background: #dbeafe; }
+
+.btn-icon {
+  padding: 0.45rem 0.75rem;
+  min-width: 36px;
+}
+
+.category-builder {
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.category-builder h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.category-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.btn-add-category {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.category-panel {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+.category-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.category-empty { font-size: 0.85rem; color: #9ca3af; margin: 0; }
+
+.category-panel-row {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  padding: 0.4rem 0.6rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+.category-panel-nom { font-weight: 600; min-width: 90px; }
+
+.category-panel-actions { display: flex; gap: 0.4rem; margin-left: auto; }
+
+.category-edit-input { padding: 0.25rem 0.5rem !important; font-size: 0.8rem !important; min-width: 0; width: 100px; }
+
+.category-panel-row { flex-wrap: wrap; align-items: center; }
+
+.category-add-form { border-top: 1px solid #e5e7eb; padding-top: 0.75rem; }
+.category-add-title { font-size: 0.85rem; font-weight: 600; color: #374151; margin: 0 0 0.5rem 0; }
+
 @media (max-width: 600px) {
   .form-row { grid-template-columns: 1fr; }
+  .category-row { grid-template-columns: 1fr 1fr; }
   .admin-concert-row { flex-direction: column; align-items: flex-start; }
 }

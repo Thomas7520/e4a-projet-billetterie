@@ -129,32 +129,93 @@ app.get('/api/concerts/:id/categories', (req, res) => {
   res.json(cats);
 });
 
-// ── ADMIN ─────────────────────────────────────────────────────────────────────
 
 const checkAdmin = (userId) => {
   const user = db.prepare('SELECT role FROM users WHERE id = ?').get(userId);
   return user && user.role === 'admin';
 };
 
+const recomputeConcertSummary = (concertId) => {
+  const cats = db.prepare('SELECT prix, stock_restant FROM categories_places WHERE concert_id = ?').all(concertId);
+  if (cats.length === 0) return;
+  const prixBase = Math.min(...cats.map(c => c.prix));
+  const stock = cats.reduce((s, c) => s + c.stock_restant, 0);
+  db.prepare('UPDATE concerts SET prixBase=?, stock=? WHERE id=?').run(prixBase, stock, concertId);
+};
+
 app.post('/api/admin/concerts', (req, res) => {
-  const { userId, titre, artiste, date, lieu, description, statut, prixBase, stock } = req.body;
+  const { userId, titre, artiste, date, lieu, description, statut, categories } = req.body;
   if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
 
-  const info = db.prepare(
-    'INSERT INTO concerts (titre, artiste, date, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  ).run(titre, artiste, date, lieu, description || '', statut || 'ouvert', prixBase, stock);
+  const create = db.transaction(() => {
+    const info = db.prepare(
+      'INSERT INTO concerts (titre, artiste, date, lieu, description, statut, prixBase, stock) VALUES (?, ?, ?, ?, ?, ?, 0, 0)'
+    ).run(titre, artiste, date, lieu, description || '', statut || 'ouvert');
 
-  res.json({ success: true, id: info.lastInsertRowid });
+    const concertId = info.lastInsertRowid;
+
+    if (categories && categories.length > 0) {
+      const insertCat = db.prepare(
+        'INSERT INTO categories_places (concert_id, nom, prix, stock_initial, stock_restant) VALUES (?, ?, ?, ?, ?)'
+      );
+      for (const cat of categories) {
+        insertCat.run(concertId, cat.nom, parseFloat(cat.prix), parseInt(cat.stock_initial), parseInt(cat.stock_initial));
+      }
+      recomputeConcertSummary(concertId);
+    }
+    return concertId;
+  });
+
+  res.json({ success: true, id: create() });
 });
 
 app.put('/api/admin/concerts/:id', (req, res) => {
-  const { userId, titre, artiste, date, lieu, description, statut, prixBase, stock } = req.body;
+  const { userId, titre, artiste, date, lieu, description, statut } = req.body;
   if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
 
   db.prepare(
-    'UPDATE concerts SET titre=?, artiste=?, date=?, lieu=?, description=?, statut=?, prixBase=?, stock=? WHERE id=?'
-  ).run(titre, artiste, date, lieu, description || '', statut, prixBase, stock, req.params.id);
+    'UPDATE concerts SET titre=?, artiste=?, date=?, lieu=?, description=?, statut=? WHERE id=?'
+  ).run(titre, artiste, date, lieu, description || '', statut, req.params.id);
 
+  res.json({ success: true });
+});
+
+app.post('/api/admin/concerts/:id/categories', (req, res) => {
+  const { userId, nom, prix, stock_initial } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  db.prepare(
+    'INSERT INTO categories_places (concert_id, nom, prix, stock_initial, stock_restant) VALUES (?, ?, ?, ?, ?)'
+  ).run(req.params.id, nom, parseFloat(prix), parseInt(stock_initial), parseInt(stock_initial));
+
+  recomputeConcertSummary(req.params.id);
+  res.json({ success: true });
+});
+
+app.put('/api/admin/categories/:catId', (req, res) => {
+  const { userId, nom, prix, stock_initial, stock_restant } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  const cat = db.prepare('SELECT concert_id FROM categories_places WHERE id = ?').get(req.params.catId);
+  if (!cat) return res.status(404).json({ error: 'Catégorie introuvable' });
+
+  db.prepare(
+    'UPDATE categories_places SET nom=?, prix=?, stock_initial=?, stock_restant=? WHERE id=?'
+  ).run(nom, parseFloat(prix), parseInt(stock_initial), parseInt(stock_restant), req.params.catId);
+
+  recomputeConcertSummary(cat.concert_id);
+  res.json({ success: true });
+});
+
+app.delete('/api/admin/categories/:catId', (req, res) => {
+  const { userId } = req.body;
+  if (!checkAdmin(userId)) return res.status(403).json({ error: 'Accès refusé' });
+
+  const cat = db.prepare('SELECT concert_id FROM categories_places WHERE id = ?').get(req.params.catId);
+  if (!cat) return res.status(404).json({ error: 'Catégorie introuvable' });
+
+  db.prepare('DELETE FROM categories_places WHERE id = ?').run(req.params.catId);
+  recomputeConcertSummary(cat.concert_id);
   res.json({ success: true });
 });
 
@@ -171,16 +232,29 @@ app.patch('/api/admin/concerts/:id/statut', (req, res) => {
 
 app.post('/api/orders', (req, res) => {
   const { cart, total, userId } = req.body;
-  const itemsSummary = cart.map(i => `${i.selectedQuantity}x ${i.artiste}`).join(', ');
+  const itemsSummary = cart.map(i =>
+    `${i.selectedQuantity}x ${i.artiste}${i.categoryNom ? ` (${i.categoryNom})` : ''}`
+  ).join(', ');
 
   const transaction = db.transaction(() => {
     for (const item of cart) {
-      const concert = db.prepare('SELECT stock, statut FROM concerts WHERE id = ?').get(item.id);
-      if (!concert || concert.stock < item.selectedQuantity) {
-        throw new Error(`Stock insuffisant pour ${item.artiste}`);
+      if (item.categoryId) {
+        const cat = db.prepare('SELECT * FROM categories_places WHERE id = ?').get(item.categoryId);
+        if (!cat || cat.stock_restant < item.selectedQuantity) {
+          throw new Error(`Stock insuffisant pour ${item.artiste} - ${item.categoryNom}`);
+        }
+        db.prepare('UPDATE categories_places SET stock_restant = stock_restant - ? WHERE id = ?')
+          .run(item.selectedQuantity, item.categoryId);
+        db.prepare('UPDATE concerts SET stock = stock - ? WHERE id = ?')
+          .run(item.selectedQuantity, item.id);
+      } else {
+        const concert = db.prepare('SELECT stock FROM concerts WHERE id = ?').get(item.id);
+        if (!concert || concert.stock < item.selectedQuantity) {
+          throw new Error(`Stock insuffisant pour ${item.artiste}`);
+        }
+        db.prepare('UPDATE concerts SET stock = stock - ? WHERE id = ?')
+          .run(item.selectedQuantity, item.id);
       }
-      db.prepare('UPDATE concerts SET stock = stock - ? WHERE id = ?')
-        .run(item.selectedQuantity, item.id);
     }
     db.prepare('INSERT INTO commandes (user_id, items, total, date_commande, statut) VALUES (?, ?, ?, ?, ?)')
       .run(userId, itemsSummary, total, new Date().toLocaleString(), 'payée');

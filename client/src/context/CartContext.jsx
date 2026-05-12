@@ -17,41 +17,55 @@ export function CartProvider({ children }) {
     refreshConcerts();
   }, []);
 
-  const addToCart = (concert, quantity) => {
-  // Chercher si l'article est déjà dans le panier
-  const existingItemIndex = cart.findIndex(item => item.id === concert.id);
-  
-  let currentQtyInCart = 0;
-  if (existingItemIndex !== -1) {
-    currentQtyInCart = cart[existingItemIndex].selectedQuantity;
-  }
+  const addToCart = (concert, quantity, category = null) => {
+    const existingItemIndex = cart.findIndex(item =>
+      category
+        ? item.id === concert.id && item.categoryId === category.id
+        : item.id === concert.id && !item.categoryId
+    );
 
-  const totalRequested = currentQtyInCart + quantity;
+    let currentQtyInCart = 0;
+    if (existingItemIndex !== -1) {
+      currentQtyInCart = cart[existingItemIndex].selectedQuantity;
+    }
 
-  // Vérification stricte du stock 
-  if (totalRequested > concert.stock) {
-    toast.error(`Stock insuffisant ! Il ne reste que ${concert.stock} places.`);
-    return false;
-  }
+    const totalRequested = currentQtyInCart + quantity;
+    const stockLimit = category ? category.stock_restant : concert.stock;
 
-  // Mise à jour ou Ajout
-  if (existingItemIndex !== -1) {
-    const newCart = [...cart];
-    newCart[existingItemIndex].selectedQuantity = totalRequested;
-    setCart(newCart);
-  } else {
-    setCart(prev => [...prev, { ...concert, selectedQuantity: quantity }]);
-  }
+    if (totalRequested > stockLimit) {
+      const label = category ? ` en ${category.nom}` : '';
+      toast.error(`Stock insuffisant ! Il ne reste que ${stockLimit} place(s)${label}.`);
+      return false;
+    }
 
-  return true;
-};
+    if (totalRequested > 6) {
+      toast.error('Maximum 6 billets par commande pour cette catégorie.');
+      return false;
+    }
+
+    if (existingItemIndex !== -1) {
+      const newCart = [...cart];
+      newCart[existingItemIndex].selectedQuantity = totalRequested;
+      setCart(newCart);
+    } else {
+      setCart(prev => [...prev, {
+        ...concert,
+        selectedQuantity: quantity,
+        categoryId: category ? category.id : null,
+        categoryNom: category ? category.nom : null,
+        prixUnitaire: category ? category.prix : concert.prixBase,
+      }]);
+    }
+
+    return true;
+  };
 
   const removeFromCart = (index) => {
     setCart(prev => prev.filter((_, i) => i !== index));
   };
 
   const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.prixBase * item.selectedQuantity), 0);
+    return cart.reduce((sum, item) => sum + (item.prixUnitaire * item.selectedQuantity), 0);
   };
 
   const finalizeOrder = async (userId) => {

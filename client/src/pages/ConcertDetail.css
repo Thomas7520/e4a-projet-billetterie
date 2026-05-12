@@ -44,8 +44,71 @@
   padding: 25px;
   border: 1px solid #e9ecef;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.category-selector h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.category-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-btn {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  padding: 12px 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 110px;
+}
+
+.category-btn:hover:not(:disabled) {
+  border-color: #28a745;
+}
+
+.category-btn.active {
+  border-color: #28a745;
+  background: #f0fdf4;
+}
+
+.category-btn.sold-out {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.category-nom {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.category-prix {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #28a745;
+  margin: 3px 0;
+}
+
+.category-stock {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.quantity-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .price-info h4 {

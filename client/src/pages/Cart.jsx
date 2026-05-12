@@ -18,8 +18,11 @@ function Cart() {
             {cart.map((item, index) => (
               <div key={index} className="cart-item">
                 <div className="cart-item-info">
-                  <span className="cart-item-name">{item.artiste}</span>
-                  <span className="cart-item-details">{item.selectedQuantity} billet(s) x {item.prixBase} €</span>
+                  <span className="cart-item-name">
+                    {item.titre || item.artiste}
+                    {item.categoryNom && <span className="cart-item-category"> — {item.categoryNom}</span>}
+                  </span>
+                  <span className="cart-item-details">{item.selectedQuantity} billet(s) × {item.prixUnitaire} €</span>
                 </div>
                 <button className="btn-remove" onClick={() => removeFromCart(index)}>Supprimer</button>
               </div>
