@@ -58,3 +58,26 @@ jobs:
       - name: Tests
         working-directory: server
         run: npm test
+
+  sonarcloud:
+    name: SonarCloud - analyse qualité
+    runs-on: ubuntu-latest
+    needs: [client, server]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=thomas7520
+            -Dsonar.projectKey=Thomas7520_e4a-projet-billetterie
+            -Dsonar.sources=client/src,server
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,server/seed-concerts.js
+            -Dsonar.javascript.lcov.reportPaths=client/coverage/lcov.info
