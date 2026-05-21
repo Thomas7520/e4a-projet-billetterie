@@ -32,6 +32,7 @@ L'application permet à des utilisateurs de consulter des concerts, de réserver
 ```bash
 cd server
 npm install
+npm install better-sqlite3
 npm start
 ```
 
@@ -47,6 +48,7 @@ Mot de passe : Admin123!
 ```bash
 cd client
 npm install
+npm install vite
 npm run dev
 ```
 
